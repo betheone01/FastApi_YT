@@ -1,7 +1,7 @@
 
 
 from typing import List
-from .. import dbmodels,schemas
+from .. import dbmodels,schemas,oauth2
 from sqlalchemy.orm import Session
 from fastapi import Response,status ,HTTPException,Depends,APIRouter
 from ..database import get_db
@@ -11,14 +11,16 @@ router=APIRouter(prefix="/posts",tags=["post"])
 
 
 @router.get("/",response_model=List[schemas.PostOut])
-def get_posts(db:Session=Depends(get_db)):
+def get_posts(db:Session=Depends(get_db),user_id:int =Depends(oauth2.get_current_user)):
     posts=db.query(dbmodels.Post).all()
-    print(posts)
+    # print(posts)
     return posts
 
 
 @router.post("/",response_model=schemas.PostOut)
-def create_post(post: schemas.PostCreate,db:Session=Depends(get_db)):
+def create_post(post: schemas.PostCreate,db:Session=Depends(get_db),user_id:int =Depends(oauth2.get_current_user)):
+    
+    print(user_id)
     post_dict=post.dict()
     new_post=dbmodels.Post(**post_dict)
     
@@ -29,8 +31,8 @@ def create_post(post: schemas.PostCreate,db:Session=Depends(get_db)):
 
 
 @router.get("/{id}",response_model=schemas.PostOut)
-def get_posts(id:int,db:Session=Depends(get_db)):
-    
+def get_posts(id:int,db:Session=Depends(get_db),user_id:int =Depends(oauth2.get_current_user)):
+
     post=db.query(dbmodels.Post).filter(dbmodels.Post.id==id).first()
     # print(post)
     if not post:
@@ -40,7 +42,7 @@ def get_posts(id:int,db:Session=Depends(get_db)):
 
 
 @router.put("/{id}",response_model=schemas.PostOut)
-def update_post(id:int,post:schemas.PostUpdate,db:Session=Depends(get_db)):
+def update_post(id:int,post:schemas.PostUpdate,db:Session=Depends(get_db),user_id:int =Depends(oauth2.get_current_user)):
     
     updated_post=db.query(dbmodels.Post).filter(dbmodels.Post.id==id)
     print(updated_post)
@@ -54,7 +56,7 @@ def update_post(id:int,post:schemas.PostUpdate,db:Session=Depends(get_db)):
 
 
 @router.delete("/{id}")
-def delete_post(id:int,db:Session = Depends(get_db)):
+def delete_post(id:int,db:Session = Depends(get_db),user_id:int =Depends(oauth2.get_current_user)):
     
     post=db.query(dbmodels.Post).filter(dbmodels.Post.id==id)
     print(post)

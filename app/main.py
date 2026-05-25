@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from . import dbmodels,schemas,utils
 from .database import SessionLocal,engine,get_db
 from sqlalchemy.orm import Session
-from .routers import post ,user
+from .routers import post ,user,auth
 
 
 dbmodels.Base.metadata.create_all(bind=engine)
@@ -21,6 +21,8 @@ app= FastAPI() #Instantiate Fastapi
 load_dotenv()
 app.include_router(post.router)
 app.include_router(user.router)
+app.include_router(auth.router)
+
 
 
 
