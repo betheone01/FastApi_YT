@@ -1,20 +1,13 @@
 
-from fastapi import FastAPI, Body,Response,status ,HTTPException,Depends
-from typing import Optional,List
-from pydantic import BaseModel
-from random import randrange
-import psycopg2 
-from psycopg2.extras import RealDictCursor
-import os
+from fastapi import FastAPI,Depends
 from dotenv import load_dotenv
-from . import dbmodels,schemas,utils
-from .database import SessionLocal,engine,get_db
+from . import dbmodels
+from .database import engine,get_db
 from sqlalchemy.orm import Session
-from .routers import post ,user,auth
+from .routers import post,user,auth
 
 
 dbmodels.Base.metadata.create_all(bind=engine)
-
 
 
 app= FastAPI() #Instantiate Fastapi 
@@ -22,24 +15,6 @@ load_dotenv()
 app.include_router(post.router)
 app.include_router(user.router)
 app.include_router(auth.router)
-
-
-
-
-try:
-    conn = psycopg2.connect(
-        host=os.getenv("HOST"),
-        database=os.getenv("DATABASE"),
-        user=os.getenv("DB_USER"),
-        password="ani@9355",
-        cursor_factory=RealDictCursor
-    )
-    # print(conn)
-    cursor=conn.cursor()
-    print("Database Connected")
-except Exception as error:
-    print(error)
-    
 
     
     
