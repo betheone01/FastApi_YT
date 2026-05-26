@@ -5,6 +5,8 @@ from . import dbmodels
 from .database import engine,get_db
 from sqlalchemy.orm import Session
 from .routers import post,user,auth
+from pydantic_settings import BaseSettings
+
 
 
 dbmodels.Base.metadata.create_all(bind=engine)

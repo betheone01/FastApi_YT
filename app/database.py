@@ -1,34 +1,32 @@
-# To Handle the DB conection
-
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker,session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-import os
-from dotenv import load_dotenv
-load_dotenv()
+
+from .config import settings
+
+DB_URL = (
+    f"postgresql://"
+    f"{settings.DB_USER}:"
+    f"{settings.PASSWORD}@"
+    f"{settings.HOST}/"
+    f"{settings.DATABASE}"
+)
 
 
-# DB_URL= "postgreqsql://user:password@postgresServer:db"
+engine = create_engine(DB_URL)
 
-host=os.getenv("HOST")
-database=os.getenv("DATABASE")
-db_user=os.getenv("DB_USER")
-password=os.getenv("PASSWORD")
+SessionLocal = sessionmaker(
+    autoflush=False,
+    autocommit=False,
+    bind=engine
+)
 
-
-DB_URL=f"postgresql://{db_user}:{password}@{host}/{database}"
-
-engine=create_engine(DB_URL)
-SessionLocal=sessionmaker(autoflush=False, autocommit=False,bind=engine)
-
-Base= declarative_base()
-
+Base = declarative_base()
 
 
 def get_db():
-    db=SessionLocal()
+    db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-
