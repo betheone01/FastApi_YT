@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from . import dbmodels
 from .database import engine,get_db
 from sqlalchemy.orm import Session
-from .routers import post,user,auth
+from .routers import post,user,auth,vote
 from pydantic_settings import BaseSettings
 
 
@@ -17,6 +17,8 @@ load_dotenv()
 app.include_router(post.router)
 app.include_router(user.router)
 app.include_router(auth.router)
+app.include_router(vote.router)
+
 
     
     

@@ -6,14 +6,22 @@ from sqlalchemy.orm import Session
 from fastapi import Response,status ,HTTPException,Depends,APIRouter
 from ..database import get_db
 
+from sqlalchemy import func
 
 router=APIRouter(prefix="/posts",tags=["post"])
 
 
-@router.get("/",response_model=List[schemas.PostOut])
+@router.get("/",response_model=List[schemas.PostVote])
 def get_posts(db:Session=Depends(get_db),user_id:int =Depends(oauth2.get_current_user),limit:int=10,skip:int=0,search:Optional[str]=""):
+    
     posts=db.query(dbmodels.Post).filter(dbmodels.Post.title.contains(search)).limit(limit=limit).offset(skip).all()
-    return posts
+    
+    
+    results=db.query(dbmodels.Post,func.count(dbmodels.Vote.post_id).label("votes")).join(dbmodels.Vote, dbmodels.Vote.post_id==dbmodels.Post.id,isouter=True).group_by(dbmodels.Post.id).filter(dbmodels.Post.title.contains(search)).limit(limit=limit).offset(skip).all()
+    print(results)
+    
+    
+    return results
 
 
 @router.post("/",response_model=schemas.PostOut)
@@ -30,14 +38,15 @@ def create_post(post: schemas.PostCreate,db:Session=Depends(get_db),current_user
     return new_post
 
 
-@router.get("/{id}",response_model=schemas.PostOut)
+@router.get("/{id}",response_model=schemas.PostVote)
 def get_posts(id:int,db:Session=Depends(get_db),user_id:int =Depends(oauth2.get_current_user)):
 
-    post=db.query(dbmodels.Post).filter(dbmodels.Post.id==id).first()
+    # post=db.query(dbmodels.Post).filter(dbmodels.Post.id==id).first()
+    results=db.query(dbmodels.Post,func.count(dbmodels.Vote.post_id).label("votes")).join(dbmodels.Vote, dbmodels.Vote.post_id==dbmodels.Post.id,isouter=True).group_by(dbmodels.Post.id).filter(dbmodels.Post.id==id).first()
     # print(post)
-    if not post:
+    if not results:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND ,detail="NOT FOUND")
-    return post
+    return results
 
 
 

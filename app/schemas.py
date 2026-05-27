@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel,EmailStr
+from pydantic import BaseModel,EmailStr,conint
 from typing import Optional
 from datetime import datetime
 
@@ -31,8 +31,14 @@ class PostOut(PostBase):
     owner: UserOut
     class Config:
         orm_mode=True    
-    
-    
+
+# New schema
+class PostVote(BaseModel):
+    Post: PostOut
+    votes: int
+
+    class Config:
+        from_attributes = True    
 
 class UserCreate(BaseModel):
     email:EmailStr 
@@ -55,3 +61,9 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id:Optional[int]=None
+    
+    
+    
+class Vote(BaseModel):
+    post_id:int
+    dir:conint(le=1)
